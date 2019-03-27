@@ -1,0 +1,301 @@
+\documentclass[a4paper]{article}
+\usepackage[margin = 1.5cm]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{stmaryrd}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{csquotes}
+\usepackage{xfrac}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{titlesec}
+\lstset{language=C}
+\usepackage[latin1]{inputenc}
+
+\newcommand{\sectionbreak}{\clearpage}
+
+\title{%
+		\huge Assignment 1 \\
+\large System Modelling and Design}
+\author{Charlie Bradford z5114682}
+\date{\today}
+
+\begin{document}
+\vspace{2 in}
+\maketitle
+
+
+
+\section{Specification}
+
+Define the predicate $P(l, a, b, m)$ to mean:
+$$ \forall x \in 1..(l-1); a[x] \neq a[x-1] \Rightarrow \exists j \in 1..m.(b[j] = a[x] \land b[j-1] = a[x-1] \land  P(x, a, b, j-1)) $$
+$P$ Checks recursively that all transitions between one string and another is preserved in order (by it's recursive nature). As every element in a either come before a different element or after a different element (or both), $P$ ensures that all elements in $a$ up to $a[i]$ are also in $b$.
+ \\
+Define the predicate $Q(l, b)$ to mean:
+$$ \forall x \in 1..l(b[x] \neq b[x-1])$$
+This is the uniqueness predicate and ensures that there are no repeats in $b$.
+\\
+Define the predicate $S(t, v, r)$ to mean:
+$$ \exists! x;t[x] = 0 \Rightarrow \forall m \in 0..(min(x, r) - 1)(t[m] = v[m]) $$
+This is the string equality predicate for use in loops.
+
+\begin{description}
+		\item{Precondition:} $\{ n=|a| \land n \geq 0 \} $
+		\item{Postcondition:} $\{ k = |b| \land P(n, a, b, k) \land Q(k, b) \}$
+\end{description}
+
+An assignment axiom for 2-dimensional array must also be stated. In the following proofs $\{\psi[\sfrac{a: x \mapsto y \mapsto z}{a}]\}a[x][y] := z \{\psi\}$ is used. 
+
+$$ \forall x \in \mathbb{R} | a[x] \in a(\forall y \in \mathbb{R} | a[x][y] \in a[x](\{\psi[\sfrac{a: x \mapsto y \mapsto z}{a}]\}a[x][y] := z \{\psi\})) $$
+
+
+
+\section{Implementation}
+\begin{align*}
+		& && \{ n=|a| \land n \geq 0 \} \Rightarrow I[\sfrac{0}{1}]\\
+		& i := 0; \\
+		& \textbf{while } a[0][i] \neq 0 \textbf{ do} && I \land a[0][i] \neq 0 \Rightarrow I[\sfrac{i+1}{i}][\sfrac{b:0\mapsto i \mapsto a[0][i]}{b}]\\
+		& \quad b[0][i] := a[0][i];  && I[\sfrac{i+1}{i}] \\
+		& \quad i := i + 1; && I \\
+		& \textbf{ od} && I \land a[0][i] = 0 \Rightarrow J[\sfrac{0}{k}][\sfrac{0}{i}] \\
+		& i := 0; && \{J[\sfrac{0}{k}]\}\\
+		& k := 0; && \{J\} \\
+		& \textbf{while } i < n \textbf{ do} && \{J \land i < n \land \neg S(a[i], b[k] , \infty)\} \\
+		& &&\Rightarrow J[\sfrac{k+1}{k}][\sfrac{b:k \mapsto a[i]}{b}][\sfrac{i+1}{i}] \\
+		& && \{J \land i < n \land S(a[i], b[k] , \infty)\} \Rightarrow J[\sfrac{i+1}{i}] \\
+		& \quad copy := False; && J[\sfrac{i+1}{i}] \land i < n \Rightarrow K[\sfrac{0}{j}][\sfrac{False}{copy}] \\
+		& \quad j := 0;  && K\\
+		& \quad \textbf{while } a[i][j] \neq 0 \land b[k][j] \neq 0 \land \neg copy \textbf{ do} && K \land \neg copy \land a[i][j] = b[k][j]\\
+		& && \Rightarrow K[\sfrac{j+1}{j}] \\
+		& && K \land \neg copy \land b[i][j] \neq b[k][j] \Rightarrow K[\sfrac{j+1}{j}][\sfrac{True}{copy}]\\
+		& && K \land \neg copy \land b[i][j] = 0 \land b[k][j] = 0 \Rightarrow K[\sfrac{j+1}{j}] \land \neg copy \\
+		& \qquad \textbf{if } a[i][j] \neq b[k][j] \textbf{ then} \\
+		& \qquad \quad copy := True; \\
+		& \qquad \textbf{fi} \\
+		& \qquad j := j + 1; && K\\
+		& \quad \textbf{od} \\
+		& \quad \textbf{if } copy \textbf{ then} && K[\sfrac{True}{copy}] \Rightarrow L[\sfrac{k+1}{k}][\sfrac{0}{j}] \\
+		& \qquad j := 0; && L[\sfrac{k+1}{k}] \\
+		& \qquad k := k + 1; && L \\
+		& \qquad \textbf{while } a[i][j] \neq 0 \textbf{ do}  && L \land a[i][j] \neq 0 \Rightarrow L[\sfrac{j+1}{j}][\sfrac{b:k\mapsto j \mapsto a[i][j]}{b}] \\
+		& \qquad \quad b[k][j] := a[i][j]; && L[\sfrac{j+1}{j}]\\
+		& \qquad \quad j := j + 1; && L\\
+		& \qquad \textbf{od} \\
+		& \quad \textbf{fi} && \\
+		& \quad i := i + 1; && J \\
+		& \textbf{od} && J \land i > n \Rightarrow \{k = |b| \land P(n, a, b, k) \land Q(k, b)\}[\sfrac{k+1}{k}] \\
+		& k := k + 1
+\end{align*}
+
+
+\subsection{Loop Invariants}
+\begin{description}
+		\item[$I$] $= \{S(a[0], b[0], i)\}$
+		\item[$J$] $= \{0 \leq i \leq n \land k + 1 = |b| \land P(i, a, b, k) \land Q(k, b)\} $
+		\item[$K$] $= \{copy \oplus S(a[i], b[k], j) \} (\oplus = \text{ logical xor})$
+		\item[$L$] $= \{S(a[i], b[k], j)\}$
+\end{description}
+		
+		
+
+\subsection{Implication 1}
+$$ \{n = |a| \land n \geq 1 \} \Rightarrow I[\sfrac{0}{i}] $$
+We begin by unpacking $I$.
+\begin{align*}
+		& n = |a| \land n \geq 1 \\
+		\Rightarrow & { S(a[0], b[0], i) }[\sfrac{0}{i}] \\
+		\Leftrightarrow & S(a[0], b[0], 0) \\
+		\Leftrightarrow & \exists! x;a[0][x] = 0 \Rightarrow \forall m \in 0..(min(x, 0) - 1)(a[0][m] = b[0][m]) \\
+		\Leftrightarrow & \exists! x;a[0][x] = 0 \Rightarrow \forall m \in 0..(-1)(a[0][m] = b[0][m]) \\
+\end{align*}
+The RHS is true as there are no values which to compare. Thus the implication is true.
+
+
+\subsection{Implication 2}
+$$ I \land a[0][i] \neq 0 \Rightarrow I[\sfrac{i+1}{i}][\sfrac{b:0 \mapsto i \mapsto a[0][i]}] $$
+We begin by unpacking the invariant and performing substitutions.
+\begin{align*}
+		& S(a[0], b[0], i) \land a[0][i] \neq 0 \\
+		\Rightarrow & { S(a[0], b[0], i) }[\sfrac{i+1}{i}][\sfrac{b: 0 \mapsto i \mapsto a[0][i]}{b}] \\
+\end{align*}
+	
+\subsection{Implication 3}
+$$ I \land a[0][i] = 0 \Rightarrow J[\sfrac{1}{i}][\sfrac{0}{k}] $$
+
+We begin by unpacking the invariants and performing any substitutions.
+\begin{align*}
+		& n = |a| \land n \geq 1 \land \forall l \in 0..(i-1)(a[0][l] = b[0][l]) \land a[0][i] = 0 \\
+\end{align*}
+
+On the RHS, the first cojunct is trivial, and the last is vacuous. Given that $i$ is the last character in $a[0]$ and that everything before $i$ is stored in $b[0]$ we know that the size of $b$ is one (as it was empty before), thus we know that the second last conjuct is also true. As far as the predicate is concerned, there is no pair of different numbers from $1$ to $1$ so it returns true regardless. 
+
+\subsection{Implication 4}
+$$ J \land i < n \land \neg S(a[i],b[k],\infty) \Rightarrow J[\sfrac{k+1}{k}][\sfrac{b:k \mapsto a[i]}{b}][\sfrac{i+1}{i}] $$
+
+This considers the case that a newline has been found and must be added to $b$.
+\begin{align*}
+		& 0 \leq i \leq n \land k + 1 = |b| \land P(i, a, b, k) \land Q(k, b) \land i < n \land \neg S(a[i], b[k], \infty) \\ 
+		\Rightarrow & \{ 0 \leq i \leq n \land k + 1 = |b| \land P(i, a, b, k) \land Q(k, b)\}[\sfrac{k+1}{k}][\sfrac{b:k \mapsto a[i]}{b}][\sfrac{i+1}{i}] \\
+		\Leftrightarrow & \leq i + 1 \leq n \land k + 2 = |(b:k+1\mapsto a[i])| \land P(i+1, a, (b:k+1\mapsto a[i]), k+1) \land Q(k+q, (b:k+1\mapsto a[i])) \\ 
+\end{align*}
+We know that $i < n$ from the LHS and so can discharge that and $0 \leq i \leq n$ from the LHS and $0 \leq i+1 \leq n$ from the RHS. We also know that, having performed an assignment to values within $b[k+1]$, $|b| = k+2$. This leaves us with the predicates $P$ and $Q$. 
+
+\begin{align*}
+		& P(i, a, b, k) \land Q(k, b) \land \neg S(a[i], b[k], \infty)\\
+		\Rightarrow & P(i+1, a, (b:k+1\mapsto a[i]), k+1) \land Q((b:k+1\mapsto a[i]), k+1)\\
+\end{align*}
+
+First let us focus on $P$. On the RHS $P$ considers cases for $x \in 1..i$ and $m \in 1..(k+1)$, however our we already have cases $x \in 1..(i-1)$ and $j \in 1..k$ present on our LHS. Thus we need only prove $P(i+1, a, (b:k+1\mapsto a[i]), k+1)$ for cases where $x = i$ and $j = k+1$. 
+\begin{align*}
+		& \forall x \in 1..(i-1); a[x] \neq a[x-1] \Rightarrow \exists j \in 1..k.(b[j] = a[x] \land b[j-1] = a[x-1] \land  P(x, a, b, j-1)) \\
+		\Rightarrow & \forall x \in 1..i; a[x] \neq a[x-1] \Rightarrow \exists j \in 1..(k+1).((b:k+1\mapsto a[i])[j] = a[x] \land (b:k+1\mapsto a[i])[j-1] = a[x-1] \land  P(x, a, (b:k+1\mapsto a[i]), j-1)) \\
+		\Leftrightarrow & a[i] \neq a[i-1] \Rightarrow (b:k+1\mapsto a[i])[k+1] = a[i] \land (b:k+1\mapsto a[i])[k] = a[i-1] \land P(i, a, (b:k+1\mapsto a[i]), k) \\
+\end{align*}
+The last conjuct is considered in the RHS so can be discarded. And, given $P(i, a, b, k)$, we know that the element that last occurs in $a[i-1]$ must also occur in $b[k]$. This leaves $(b:k+1 \mapsto a[i])[k+1] = a[i]$ which is tautological. \\
+Now considering $Q$. Likewise with $P$, the values of $x \in 1..k$ have be considered, so we need only prove $Q$ for $x = k+1$.
+\begin{align*}
+		& \forall x \in 1..k(b[x] \neq b[x-1]) \land \neg S(a[i], b[k], \infty)\\
+		\Rightarrow & \forall x \in 1..(k+1)((b:k+1\mapsto a[i])[x] \neq (b:k+1\mapsto a[i])[x-1]) \\
+		\Leftrightarrow & (b:k+1\mapsto a[i])[k+1] \neq (b:k+1\mapsto a[i])[k]) \\
+		\Leftrightarrow & a[i] \neq b[k] 
+\end{align*}
+Which was shown on the LHS.
+
+
+\subsection{Implication 5}
+$$ J \land i < n \land S(a[i],b[k],\infty) \Rightarrow J[\sfrac{i+1}{i}] $$
+
+This considers the case that a line is repeated, and thus, ignored.
+\begin{align*}
+		& 0 \leq i \leq n \land k + 1 = |b| \land P(i, a, b, k) \land Q(k, b) \land i < n \land S(a[i], b[k], \infty) \\ 
+		\Rightarrow & \{0 \leq i \leq n \land k + 1 = |b| \land P(i, a, b, k) \land Q(k, b) \}[\sfrac{i+1}{i}]\\ 
+		\Leftrightarrow & 0 \leq i + 1 \leq n \land k + 1 = |b| \land P(i+1, a, b, k) \land Q(k, b) 
+\end{align*}
+As in implication four we can discard the conjucts $0 \leq i \leq n$ and $i < n$ from the LHS, and $0 \leq i + 1 \leq n$ from the RHS. $k$ and $b$ both remain unchanged so we can discharge both conjucts that only concern those variables from both the LHS and RHS. This leaves only $P$ and $S$.
+\begin{align*}
+		& P(i, a, b, k) \land S(a[i], b[k], \infty) \\
+		\Rightarrow & P(i+1, a, b, k)
+\end{align*}
+The only difference between the LHS and RHS would be if $a[i] \neq a[i-1]$, however, given $P(i, a, b, k)$ we know that $b[k] = a[i-1]$, and, given $S(a[i], b[k], \infty)$, we know that $b[k] = a[i]$, so the LHS and RHS are logically equivalent.
+
+\subsection{Implication 6}
+$$ J[\sfrac{i+1}{i}] \land i < n \Rightarrow K[\sfrac{0}{j}][\sfrac{False}{copy}] $$
+
+\begin{align*}
+		& J[\sfrac{i+1}{i}] \land i < n \\
+		\Leftrightarrow & 0 \leq i + 1 \leq n \land k + 1 = |b| \land P(i + 1, a, b, k) \land Q(k, b) \\
+		\Rightarrow & K[\sfrac{0}{j}][\sfrac{False}{copy}] \\
+		\Leftrightarrow & False \oplus S(a[i], b[k], 0)
+\end{align*}
+The last conjuct of the RHS is vacuously true for $j=0$. $(False \oplus True) = True$, so the the RHS is always true, regardless of the LHS. Thus the implication is always true.
+
+
+\subsection{Implication 7}
+$$ K \land \neg copy \land a[i][j] = b[k][j] \Rightarrow K[\sfrac{j+1}{j}] $$
+
+\begin{align*}
+		& K \land \neg copy \land a[i][j] = b[k][j] \\
+		\Leftrightarrow & (copy \oplus S(a[i], b[k], j)) \land \neg copy \land a[i][j] = b[k][j] \\
+		\Leftrightarrow & S(a[i], b[k], j) \land a[i][j] = b[k][j] \\
+		\Rightarrow & K[\sfrac{j+1}{j}] \\
+		\Leftrightarrow & copy \oplus S(a[i], b[[k], j+1)
+\end{align*}
+
+Expanding the RHS.
+\begin{align*}
+		& S(a[i], b[k], j) \land a[i][j] = b[k][j] \\
+		\Rightarrow \exists! x; t[x] = 0 \Rightarrow m \in 0..j(a[i][m] = b[k][m]) \\
+		\Leftrightarrow S(a[i], b[k], j) \land a[i][j] = b[k][j] 
+\end{align*}
+The LHS is equivalent to the RHS.
+
+
+
+\subsection{Implication 8}
+$$ K \land \neg copy \land a[i][j] \neq b[k][j] \Rightarrow K[\sfrac{j+1}{j}][\sfrac{True}{copy}] $$
+
+\begin{align*}
+		& (copy \oplus S(a[i], b[k], j)) \land \neg copy \land a[i][j] \neq b[k][j] \\
+		\Leftrightarrow & S(a[i], b[k], j) \land a[i][j] \neq b[k][j] \\
+		\Rightarrow & True \oplus S(a[i], b[k], j+1) \\
+		\Leftrightarrow & \neg S(a[i], b[k], j+1)
+\end{align*}
+Exactly as with above $S$ for all cases up to $j$ is considered in the LHS, so we can discard $S$ from the LHS and simultaneously unpack and discard what we already know from $S$ on the RHS. 
+\begin{align*}
+		& a[i][j] \neq b[k][j] \\
+		\Rightarrow & \forall m \in j..j(a[i][m] \neq b[k][m]) \\
+		\Leftrightarrow & a[i][j] \neq b[k][j]
+\end{align*}
+The LHS is equivalent to the RHS.
+
+\subsection{Implication 9}
+$$ K \land \neg copy \land a[i][j] = 0 \land b[k][j] = 0 \Rightarrow K[\sfrac{j+1}{j}] \land \neg copy$$
+
+\begin{align*}
+		& (copy \oplus S(a[i], b[k], j)) \land \neq copy \land a[i][j] = 0 \land b[k][j] = 0 \\
+		\Leftrightarrow & S(a[i], b[k], j) \land a[i][j] = 0 \land b[k][j] = 0 \\
+		\Rightarrow & (copy \oplus S(a[i], b[k], j+1)) \land \neg copy \\
+		\Leftrightarrow & S(a[i], b[k], j+1)
+\end{align*}
+The predicate $S$ finds a value for $x$ where the $t[x] = 0$, i.e. the end of the null terminated string. It then tests equality of each character in the string up until one less than the minimum of $x$ and a supplied $r$. However in this case $r=x$, and $r=j+1$, and therefore $j+1 < x$. So now we know that the predicate is true for values up to $j-1$ and we need only prove it for $j$.
+\begin{align*}
+		& S(a[i], b[k], j) \land a[i][j] = 0 \land b[k][j] = 0 \\
+		\Leftrightarrow & \forall m \in 0..(j-1)(a[m] = b[m]) \land a[i][j] = 0 \land b[k][j] = 0 \\
+		\Rightarrow & \forall m \in 0..j(a[m] = b[m])
+\end{align*}
+Discard the redundant.
+\begin{align*}
+		& a[i][j] = 0 \land b[k][j] = 0 \\
+		\Rightarrow & a[i][j] = b[k][j] \\
+\end{align*}
+The values of $a[i][j]$ and $b[k][j]$ are known to be the same from the LHS so the statement is true.
+
+
+
+
+
+\subsection{Implication 10}
+$$ K[\sfrac{True}{copy}] \Rightarrow L[\sfrac{k+1}{k}][\sfrac{0}{j}] $$
+
+\begin{align*}
+		& True \oplus S(a[i], b[k], j) \\
+		\Leftrightarrow & \neg S(a[i], b[k], j) \\
+		\Rightarrow & S(a[i], b[k+1], 0)
+\end{align*}
+As shown previously, $S$ is vacuously true for third argument 0. $($LHS$ \Rightarrow True) = True$
+
+\subsection{Implication 11}
+$$ L \land a[i][j] \neq 0 \Rightarrow L[\sfrac{j+1}{j}][{b:k\mapsto j \mapsto a[i][j]}{b}] $$
+An equivalent statement was proved in Implication 2, see section 2.3 for more details. 
+
+
+\subsection{Implication 12}
+$$ J \land i \geq n \Rightarrow \text{Postcondition}[\sfrac{k+1}{k}] $$
+
+Unpack 
+\begin{align*}
+		& 0 \leq i \leq n \land k + 1 = |b| \land P(i, a, b, k) \land Q(k, b) \land i \geq n \\
+		\Rightarrow & k + 1 = |b| \land P(n, a, b, k) \land Q(k, b) 
+\end{align*}
+Things look pretty clear. $0 \leq i \leq n \land i \geq n$ can be resolved to simply $i = n$. 
+\begin{align*}
+		& i = n \land k + 1 = |b| \land P(i, a, b, k) \land Q(k, b) \\
+		\Rightarrow & k + 1 = |b| \land P(n, a, b, k) \land Q(k, b)
+\end{align*}
+Now the only difference is the arguments passed to $P$. But we said they are the same. So the statements are logically equivalent and thus LHS $\Rightarrow$ RHS.
+
+
+\section{Program}
+\lstinputlisting{uniq.c}
+
+Changes made:
+\begin{itemize}
+		\item Assigning a value directly to a char in a string is undefined in C, so I had to use the strcpy() function contained in string.h for the loops with invariants $I$ and $L$.
+\end{itemize}
+
+
+\end{document}

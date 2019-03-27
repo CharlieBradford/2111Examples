@@ -1,0 +1,398 @@
+\documentclass[a4paper]{article}
+\usepackage[margin = 1.5cm]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{stmaryrd}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[latin1]{inputenc}
+\usepackage{csquotes}
+\usepackage{xfrac}
+\usepackage{xcolor}
+\usepackage{soul}
+\usepackage{listings}
+\usepackage{titlesec}
+\lstset{language=C}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\definecolor{mGreen}{rgb}{0,0.6,0}
+\definecolor{mGray}{rgb}{0.5,0.5,0.5}
+\definecolor{mPurple}{rgb}{0.58,0,0.82}
+\definecolor{backgroundColour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{CStyle}{
+    backgroundcolor=\color{backgroundColour},   
+    commentstyle=\color{mGreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{mGray},
+    stringstyle=\color{mPurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    language=C
+}
+% PSEUDOCODE ALGORITHMIC STYLE -- Released 27 APR 2005
+%    for LaTeX version 2e
+%
+% Copyright Szasz Janos
+% E-mail szaszjanos@users.sourceforge.net
+% Based on Peter Williams's algorithmic.sty
+%
+\NeedsTeXFormat{LaTeX2e}%
+\ProvidesPackage{algpseudocode}%
+\RequirePackage{ifthen}%
+\RequirePackage{algorithmicx}%
+\typeout{Document Style - pseudocode environments for use with the `algorithmicx' style}%
+%
+\def\ALG@noend{f}%
+\newboolean{ALG@compatible}%
+\setboolean{ALG@compatible}{false}%
+%
+\DeclareOption{noend}{\def\ALG@noend{t}}%
+\DeclareOption{end}{\def\ALG@noend{f}}%
+\DeclareOption{compatible}{\typeout{For compatibility mode use algcompatible.sty!!!}\setboolean{ALG@compatible}{true}}%
+\DeclareOption{noncompatible}{\setboolean{ALG@noncompatible}{false}}%
+\ProcessOptions%
+%
+%      ***      DECLARATIONS      ***
+%
+\algnewlanguage{pseudocode}%
+\alglanguage{pseudocode}%
+%
+%      ***      KEYWORDS      ***
+%
+\algnewcommand\algorithmicend{\textbf{end}}
+\algnewcommand\algorithmicdo{\textbf{do}}
+\algnewcommand\algorithmicwhile{\textbf{while}}
+\algnewcommand\algorithmicfor{\textbf{for}}
+\algnewcommand\algorithmicforall{\textbf{for all}}
+\algnewcommand\algorithmicloop{\textbf{loop}}
+\algnewcommand\algorithmicrepeat{\textbf{repeat}}
+\algnewcommand\algorithmicuntil{\textbf{until}}
+\algnewcommand\algorithmicprocedure{\textbf{procedure}}
+\algnewcommand\algorithmicfunction{\textbf{function}}
+\algnewcommand\algorithmicif{\textbf{if}}
+\algnewcommand\algorithmicthen{\textbf{then}}
+\algnewcommand\algorithmicelse{\textbf{else}}
+\algnewcommand\algorithmicrequire{\textbf{Require:}}
+\algnewcommand\algorithmicensure{\textbf{Ensure:}}
+\algnewcommand\algorithmicreturn{\textbf{return}}
+\algnewcommand\textproc{\textsc}
+%
+%      ***      DECLARED LOOPS      ***
+%
+\algdef{SE}[WHILE]{While}{EndWhile}[1]{\algorithmicwhile\ #1\ \algorithmicdo}{\algorithmicend\ \algorithmicwhile}%
+\algdef{SE}[FOR]{For}{EndFor}[1]{\algorithmicfor\ #1\ \algorithmicdo}{\algorithmicend\ \algorithmicfor}%
+\algdef{S}[FOR]{ForAll}[1]{\algorithmicforall\ #1\ \algorithmicdo}%
+\algdef{SE}[LOOP]{Loop}{EndLoop}{\algorithmicloop}{\algorithmicend\ \algorithmicloop}%
+\algdef{SE}[REPEAT]{Repeat}{Until}{\algorithmicrepeat}[1]{\algorithmicuntil\ #1}%
+\algdef{SE}[IF]{If}{EndIf}[1]{\algorithmicif\ #1\ \algorithmicthen}{\algorithmicend\ \algorithmicif}%
+\algdef{C}[IF]{IF}{ElsIf}[1]{\algorithmicelse\ \algorithmicif\ #1\ \algorithmicthen}%
+\algdef{Ce}[ELSE]{IF}{Else}{EndIf}{\algorithmicelse}%
+\algdef{SE}[PROCEDURE]{Procedure}{EndProcedure}%
+   [2]{\algorithmicprocedure\ \textproc{#1}\ifthenelse{\equal{#2}{}}{}{(#2)}}%
+   {\algorithmicend\ \algorithmicprocedure}%
+\algdef{SE}[FUNCTION]{Function}{EndFunction}%
+   [2]{\algorithmicfunction\ \textproc{#1}\ifthenelse{\equal{#2}{}}{}{(#2)}}%
+   {\algorithmicend\ \algorithmicfunction}%
+%
+\ifthenelse{\equal{\ALG@noend}{t}}%
+   {%
+   \algtext*{EndWhile}%
+   \algtext*{EndFor}%
+   \algtext*{EndLoop}%
+   \algtext*{EndIf}%
+   \algtext*{EndProcedure}%!TEX encoding = UTF-8 Unicode
+   \algtext*{EndFunction}%
+   }{}%
+%
+%      ***      OTHER DECLARATIONS      ***
+%
+\algnewcommand\Require{\item[\algorithmicrequire]}%
+\algnewcommand\Ensure{\item[\algorithmicensure]}%
+\algnewcommand\Return{\algorithmicreturn{} }%
+\algnewcommand\Call[2]{\textproc{#1}\ifthenelse{\equal{#2}{}}{}{(#2)}}%
+%
+%
+%
+\ifthenelse{\boolean{ALG@compatible}}%
+   {%
+   \ifthenelse{\equal{\ALG@noend}{t}}%
+      {\RequirePackage[noend]{algcompatible}}%
+      {\RequirePackage{algcompatible}}%
+   }%
+   {}%
+%
+
+\renewcommand{\Comment}[2][.5\linewidth]{%
+		\leavevmode\hfill\makebox[#1][l]{~#2}}
+
+%\newcommand{\sectionbreak}{\clearpage}%
+
+\lstdefinestyle{customc}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  frame=L,
+  xleftmargin=\parindent,
+  language=C,
+  showstringspaces=false,
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\bfseries\color{green!40!black},
+  commentstyle=\itshape\color{purple!40!black},
+  identifierstyle=\color{blue},
+  stringstyle=\color{orange},
+}
+
+\lstdefinestyle{customasm}{
+  belowcaptionskip=1\baselineskip,
+  frame=L,
+  xleftmargin=\parindent,
+  language=[x86masm]Assembler,
+  basicstyle=\footnotesize\ttfamily,
+  commentstyle=\itshape\color{purple!40!black},
+}
+
+\lstset{escapechar=@,style=customc}
+
+\title{%
+		\huge Assignment 2 \\
+\large System Modelling and Design}
+\author{
+		Charlie Bradford\\
+		\texttt{z5114682}}
+
+\begin{document}
+\vspace{2 in}
+\maketitle
+
+
+
+\section{Specification}
+ 
+\subsection{Definitions}
+To specify our n\textsuperscript{th} emirp procedure we make use of the following mathematical functions:
+$$ \textbf{fReversen}: \mathbb{N} \rightarrow \mathbb{N}$$
+$$ \textbf{fReversen}(i) ::= i*10^{\lfloor log_{10}\ i\rfloor} - 99 * \sum_{j=1}^{\lfloor log_{10}\ i\rfloor}\lfloor x*10^{-j} \rfloor * 10^{\lfloor log_{10}\ i \rfloor-j} $$
+\textbf{fReversen} maps each natural number to its base 10 reverse.
+\\\\
+$$ \textbf{fIsPrime}: \mathbb{N} \rightarrow \mathbb{B}$$
+$$ \textbf{fIsPrime}(i) ::= i\ \in\ \{n|\forall m\ \in\ 2..(n-1).(n\nmid m)\} $$
+\textbf{fIsPrime} returns whether or not a number is in the set of primes.
+
+$$ \textbf{fIsEmirp}: \mathbb{N} \rightarrow \mathbb{B}$$
+$$ \textbf{fIsEmirp}(i) ::= \textbf{fIsPrime}(i)\ \land\ \textbf{fIsPrime}(\textbf{Reversen}(i))\ \land\ i\ \neq\ \textbf{fReversen}(i) $$
+\textbf{IsEmirp} checks the three conditions of an emirp: primality, primality of the reverse, lack of palindromity.
+\\ \\ \\
+In our implementation we will need to make use of equivalent procs and funcs which will respectively be
+The following equivalent procs and funcs will be used 
+\begin{description}
+		\item[\textbf{reversen}] A proc that takes a value parameter $n$ and assigns the reverse to a result parameter $r$ thus the specification ``$r\ :=\ \textbf{fReversen}(n)$'' is equivalent to the procedure ``var $r;\ \textbf{reversen}(n,\ r)$''
+		\item[\textbf{isPrime}] A probabilistic function for the purpose of simplicity. May be weak to strong psuedo primes, it is very unlikely to affect the programme.
+\end{description}
+Rather than using a func equivalent for \textbf{fIsEmirp} we will simply test each of the above-listed qualities separately.
+\\\\\\
+\noindent
+Define the predicate $P$ to mean $$x, n :[\text{true}, \exists! i \in [1..x] ((\textbf{fIsEmirp}(i)) \land (n = 1 \oplus \exists!j\in [1..(i-1)](P(j, n-1))))]$$
+Wherein the unique $i$ must be the highest emirp less than or equal to $x$ and the unique $j$ must be the next emirp less than $i$. Thus if $P(x, n)$ is true then $x$ is greater than or equal to the $n^{th}$ but less than the $(n+1)^{th}$ emirp.
+
+
+
+\noindent
+Now we have the specification of our statement:
+$$ \text{emirp}:[n>0, P(p, n) \land \textbf{fIsEmirp}(p)]$$
+
+
+\section{Derivation}
+
+\begin{align*}
+		&\quad p, n:[n>0, P(p, n) \land \textbf{fIsEmirp}(p)] \quad\textcolor{red}{(0)}\\
+		\textcolor{red}{(0)} \sqsubseteq &\quad \textbf{var } i := 1; \\
+		&\quad p, n, i:[ n > 0 \land i = 1, P(p, n) \land \textbf{fIsEmirp}(p)] \quad\textcolor{red}{(1)} \\
+		\textcolor{red}{(1)} \sqsubseteq &\quad p:[n > 0 \land i = 1, i = 1 \land P(p, i)] \quad\textcolor{red}{(2)}\\
+		&\quad p, i:[i = 1 \land P(p, i), P(p, n)] \quad\textcolor{red}{(3)}\\
+		\textcolor{red}{(2)} \sqsubseteq &\quad p := 13; \\
+		\textcolor{red}{(3)} \sqsubseteq &\quad \textbf{while } i < n \textbf{ do} &&\textcolor{blue}{while}\\
+		&\qquad \textbf{con } T\ \bullet\ p,\ i:[i < n \land P(p, i) \land p = T, p = T + 2 \land P(p, i)] \quad\textcolor{red}{(4)}\\ 
+		&\quad \textbf{od}\\
+		\textcolor{red}{(4)} \sqsubseteq &\quad p := p + 2; &&\textcolor{blue}{c-frame}\\
+		&\quad p,\ i:[i < n \land P(p-2, i), P(p, i)]\quad\textcolor{red}{(5)} \\
+		\textcolor{red}{(5)}\sqsubseteq&\quad \textbf{reversen}(p, r); &&\textcolor{blue}{conproc}\\
+		&\quad \textbf{if } \textbf{isPrime}(p)\ \land\ \textbf{isPrime}(r)\ \land\ p\ \neq\ r &&\textcolor{blue}{choice}\\
+		&\qquad \textbf{then }\textbf{con } S\ \bullet\ i:[i < n \land P(p-2, i) \land i = S \land \textbf{fIsEmirp}(p),\\
+		&\qquad \qquad \qquad \qquad i = S + 1 \land P(p-2, i) \land \textbf{fIsEmirp}(p)] \quad \sqsubseteq\quad i := i + 1; &&\textcolor{blue}{c-frame}\\
+		&\qquad \textbf{else } i:[i < n \land P(p-2, i) \land \neg \textbf{fIsEmirp}(p), P(p, i)]\quad\sqsubseteq\quad \textbf{SKIP};\\
+		&\quad \textbf{fi} \\
+\end{align*}
+
+\section{Implementation}
+\begin{algorithm}
+		\begin{algorithmic}
+				\State \Comment{$\color{blue}\{n \geq 1\} \Rightarrow I[\sfrac{13}{p}][\sfrac{1}{i}]$}
+				\State $i := 1;$ \Comment{$\color{blue} I[\sfrac{13}{p}]$}
+				\State $p := 13;$ \Comment{$\color{blue}I$}
+				\While{$i < n$} \Comment{$\color{blue} I \land i < n \land \neg \textbf{fIsEmirp}(p+2) \Rightarrow I[\sfrac{p+2}{p}]$}
+				\State \Comment{$\color{blue} I \land i < n \land \textbf{fIsEmirp}(p+2) \Rightarrow I[\sfrac{p+2}{p}][\sfrac{i+1}{counter}]$}
+				\State $p := p + 2;$
+				\State \Call{reversen}{$p,\ r$}
+				\If{\Call{isPrime}{$p$} $\land$ \Call{isPrime}{$r$} $\land$ $p$ $\neq$ $r$}
+				\State $i := i + 1;$
+				\EndIf;
+				\EndWhile
+				\State \Comment{$\color{blue}I \land counter \geq n \land \textbf{fIsEmirp}(p) \Rightarrow P(p, n) \land \textbf{fIsEmirp}(p)$}
+		\end{algorithmic}
+\end{algorithm}
+Where isPrime is defined as in the GMP library mpz\_probab\_prime\_p.
+
+
+\subsection{Invariant}
+Our single loop invariant is as such:
+\begin{description}
+		\item[$I$] $ =  \{P(p, i) \land i \leq n\}$
+\end{description}
+
+\subsection{Implication 1}
+$$ n \geq 1 \Rightarrow I[\sfrac{13}{p}][\sfrac{1}{i}] $$
+\noindent
+We begin by unpacking the invariant and performing substitutions.
+\begin{align*}
+		&	n \geq 1 \\
+		\Rightarrow & \{P(p, i) \land i \leq n\}[\sfrac{13}{p}][\sfrac{1}{i}] \\
+		\Leftrightarrow & P(13, 1) \land 1 \leq n
+\end{align*}
+\noindent
+As $n \geq 1 \Leftrightarrow 1 \leq n$ we can simplify the implication to $\textbf{True} \Rightarrow P(13, 1)$. Expanding this gives:
+\begin{align*}
+		& 	P(13, 1) \\
+		\Leftrightarrow 	&	\exists i \in [1..13](\textbf{fIsEmirp}(i) \land ( 1 = 1 \oplus \exists! j \in [1..(i-1)](P(j, 0)))) \\
+		\Leftrightarrow		&	\textbf{fIsEmirp}(13) \land (\textbf{True} \oplus \exists! j \in [1..12](P(j, 0)))
+\end{align*}
+\noindent
+The simplest way to prove "$\exists! j \in [1..12](P(j, 0)$" false is to show there are no values between 1 and 12 inclusive that are both prime and not equal to their reverse. The primes in that range are $L = \langle 2, 3, 5, 7, 11 \rangle$, and their respective reverses are $\langle2, 3, 5, 7, 11\rangle$. All these numbers are equal to their reverses there for there is no $x \in L$ such that $\textbf{fIsEmirp}(x)$ is true.
+This gives us:
+\begin{align*}
+		&	P(13, 1) \\
+		\Leftrightarrow & \textbf{fIsEmirp}(13) \land (\textbf{True} \oplus \textbf{False}) \\
+		\Leftrightarrow		&	fIsPrime(13) \land fIsPrime(31) \land 13 \neq 31
+\end{align*}
+\noindent
+By calculation we can show 13 and 31 are both primes and it is clear that $13 \neq 31$ thus the RHS is true and so is the implication. 
+
+\subsection{Implication 2}
+$$I \land i < n \land \neg \textbf{fIsEmirp}(p+2) \Rightarrow I[\sfrac{p+2}{p}]$$
+We begin by unpacking the invariant and performing substitutions.
+\begin{align*}
+		& P(p, i) \land i < n \land \neg \textbf{fIsEmirp}(p+2) \\
+		\Rightarrow 	&	\{P(p, i) \land i \leq n \}[\sfrac{p+2}{p}] \\
+		\Leftrightarrow		&	P(p+2, i) \land i \leq n
+\end{align*}
+From the LHS we know that i is less than $n$ so, as $n$ is unchanged, it follows that $n$ is less than or equal to i and thus both conjuncts can be discharged.
+This leaves us with:
+\begin{align*}
+		& 	P(p, i) \land \neg \textbf{fIsEmirp}(p+2) \\
+		\Rightarrow		&	P(p+2, i)
+\end{align*}
+So now we have that $p$ is greater than or equal the $i^{th}$ emirp and less than the $(i + 1)^{th}$ and that $p + 2$ is not an emirp. So we need only show that $p + 2$ is less than the $(i + 1)^{th}$ emirp. The only candidate for an emirp less than or equal to $p + 2$ but greater than $p$ is $p + 1$. However, $p$ is intiallised at 13 and only incremented by two so $p + 1$ must be an even number. Therefore, as there is no prime number larger than two that is even, $p + 1$ cannot be prime let alone an emirp. Thus the RHS is true and the implication holds.
+
+\subsection{Implication 3}
+$$ I \land i < n \land \textbf{fIsEmirp}(p+2) \Rightarrow I[\sfrac{p+2}{p}][\sfrac{i+1}{i}] $$
+We begin by unpacking the invariant and performing substitutions.
+\begin{align*}
+		& 	P(p, i) \land i \leq n \land i < n \land \textbf{fIsEmirp}(p+2) \\
+		\Rightarrow 	&	\{ P(p, i) \land i \leq n \}[\sfrac{p+2}{p}][\sfrac{i+1}{i}] \\
+		\Leftrightarrow		&	P(p + 2, i + 1) \land i + 1 \leq n
+\end{align*}
+From the LHS we know that $i < n$ so it follows that $i \leq n$ and both of those conjucts can be discharged. This leaves us with:
+\begin{align*}
+		&	P(p, i \land \textbf{fIsEmirp}(p+2) \\
+		\Rightarrow	&	P(p + 2, i + 1) \\
+\end{align*}
+We know from the LHS that $p$ is less than the $(i + 1)^{th}$ emirp and the RHS asserts that $p+2$ is greater than or equal to the $(i + 1)^{th}$ but less than the $(i + 2)^{th}$ emirp. Given the LHS, this could only be false if $p+1$ were also an emirp, however, as above, we know that $p+1$ is even, cannot be a prime, and therefore cannot be an emirp.
+
+\subsection{Implication 4}
+		$$I \land i \geq n \land \textbf{fIsEmirp}(p) \Rightarrow P(p, n) \land \textbf{fIsEmirp}(p)$$
+Unpacking the invariant and simplifying:
+\begin{align*}
+		&	P(p, i) \land i \leq n \land i \geq n \land \textbf{fIsEmirp}(p) \\
+		\Leftrightarrow 	&	P(p, i) \and i = n \land \textbf{fIsEmirp}(p) \\
+		\Leftrightarrow		& 	P(p, n) \land \textbf{fIsEmirp}(p) \\
+		\Leftrightarrow		&	\text{RHS}	
+\end{align*}
+
+
+
+
+
+\section{Program}
+\begin{lstlisting}[style=CStyle]
+#include <stdio.h>
+#include "reverse.h"
+#include <gmp.h>
+
+typedef int bool;
+
+#define TRUE 1
+#define FALSE 0
+
+void emirp (mpz_t n, mpz_t p);
+
+int main (int argc, char *argv[])
+{
+    mpz_t n, p;
+    mpz_inits(n, p, NULL);
+
+    mpz_inp_str(n, stdin, 10);  
+
+    emirp(n, p);
+
+    gmp_printf("%Zd\n", p);
+	mpz_clear(p);
+    return 0;
+}
+
+void emirp (mpz_t n, mpz_t p)
+{
+    mpz_t i, r;
+    mpz_inits(r, NULL);
+    mpz_init_set_ui(i, 1);
+    mpz_set_ui(p, 13);
+
+    while (mpz_cmp(i, n) < 0)
+    {
+        mpz_add_ui(p, p, 1);
+        reversen(p, r);
+        if (mpz_probab_prime_p(r, 50) > 0 
+            && mpz_probab_prime_p(p, 50) > 0 
+            && mpz_cmp(r, p) != 0)
+        {
+            mpz_add_ui(i, i, 1);
+        }
+
+    }
+    mpz_clears(i, r, n, NULL);
+}
+
+\end{lstlisting}
+\subsection{Changes}
+For, gmp.h have been included in the C code and different GMP functions have been used in the C code as well, changes made during the translation to C.
+\begin{lstlisting}
+mpz_t i, r
+\end{lstlisting} The above step is to itnitialize i and r , and set their value to 0.
+\begin{lstlisting}
+mpz_inits(r, NULL);
+\end{lstlisting}
+The above step is to r's value to 0, however for there needs to be two variable, therefore NULL has been used to fill in.
+\begin{lstlisting}
+mpz_clears(i, r, n, NULL);
+\end{lstlisting}
+The above step is to free the space occupied by the variables i, r and n.
+\end{document}

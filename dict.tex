@@ -1,0 +1,469 @@
+\documentclass[a4paper, fleqn]{article}
+\usepackage[margin=2cm]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{enumitem}
+\usepackage{lastpage}
+\usepackage{stmaryrd}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{csquotes}
+\usepackage{xfrac}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{titlesec}
+\usepackage[title]{appendix}
+\usepackage{fancyhdr}
+\usepackage[font=small, labelfont=bf]{caption}
+\usepackage[english]{babel}
+\usepackage{sectsty}
+\usepackage{url, lipsum}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{mGreen}{rgb}{0,0.6,0}
+\definecolor{mGray}{rgb}{0.5,0.5,0.5}
+\definecolor{mPurple}{rgb}{0.58,0,0.82}
+\definecolor{backgroundColour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{CStyle}{
+    backgroundcolor=\color{backgroundColour},   
+    commentstyle=\color{mGreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{mGray},
+    stringstyle=\color{mPurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,     
+    breaklines=true,         
+    captionpos=b,            
+    keepspaces=true,         
+    numbers=left,            
+    numbersep=5pt,          
+    showspaces=false,        
+    showstringspaces=false,
+    showtabs=false,          
+    tabsize=2,
+    language=C
+}
+
+\lstdefinestyle{customc}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  frame=L,
+  xleftmargin=\parindent,
+  language=C,
+  showstringspaces=false,
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\bfseries\color{green!40!black},
+  commentstyle=\itshape\color{purple!40!black},
+  identifierstyle=\color{blue},
+  stringstyle=\color{orange},
+}
+
+\setlength{\mathindent}{20mm}
+
+\newcommand{\D}{\texorpdfstring{\textsuperscript{D}}{D}}
+\newcommand{\A}{\texorpdfstring{\textsuperscript{A}}{A}}
+\newcommand{\reason}[1]{\text{\textcolor{blue}{$\langle$ #1 $\rangle$}}}
+\newcommand{\num}[1]{\text{\textcolor{red}{(#1)}}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\setlength\headheight{15pt}
+\fancyhead[L]{Trie Harder}
+\fancyhead[R]{\rightmark}
+\fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
+
+\begin{document}
+
+\title{ \normalsize \textsc{COMP2111}
+        \\ [2.0cm]
+		\rule{\linewidth}{0.5pt} \\
+        \LARGE \textbf{\uppercase{Assignment 3} \\
+		\normalsize Trie Harder}
+		\rule{\linewidth}{2pt} \\ [0.5cm]
+        \normalsize \today \vspace*{5\baselineskip}}
+
+\date{}
+\author{Charlie Bradford \\
+		\texttt{z5114682}
+		\and
+		Julian Yu \\
+		\texttt{z5135085}
+		}
+
+
+\vspace{2 in}
+\maketitle
+
+\tableofcontents
+
+
+\clearpage\section{Syntactic Data Type: Dict}
+We will define a dict to be a set, $W$, of all the words in the dict.
+
+We take the syntactic data type Dict to be defined by the predicate 
+$$\text{init\D}\ =\ (W\ =\ \langle\rangle)$$
+and the following operations.
+
+%\subsection{New Dict\D}
+%\hspace*{10mm}\textbf{proc} \textit{newdict\D} () \\
+%\hspace*{20mm}$[\textbf{TRUE},\ W = \langle\rangle]$
+
+\subsection{Add Word\D}
+\hspace*{10mm}\textbf{proc} \textit{addword\D} (\textbf{value} $x$: word) \\
+\hspace*{20mm}$\quad x\ :\ [\textbf{TRUE},\ W = \langle x,\ W_0 \rangle]$ 
+
+\subsection{Check Word\D}
+\hspace*{10mm}\textbf{func} \textit{checkword\D} (\textbf{value} $x$: word): bool \\
+\hspace*{20mm}$\quad \textbf{var}\ y\ \bullet\ x,\ y\ :\ [\textbf{TRUE},\ y\ =\ (x\ \in\ W)]; \textbf{return}\ y$
+
+\subsection{Delete Word\D}
+\hspace*{10mm}\textbf{proc} \textit{delword\D} (\textbf{value} $x$: word) \\
+\hspace*{20mm}$\quad x\ :\ [x\ \in\ W,\ x\ \notin\ W]$
+
+
+\clearpage\section{Refinement to DictA}
+
+Before refinement several things must be stated. Our alphabet is $L$ and consists of the 26 letters of the Roman alphabet. All our words $w$ are in the set $L*$. We say a word $v$ is less than another word $w$ if $v$ is a prefix of $w$ ($\exists v'.vv'\ =\ w$).  \\
+
+We define a Trie $t$ to be a mapping between words ($w\ \in\ L^*$) and boolean values ($t: L^*\ \mapsto\ \mathbb{B}$). $t$ has domain $Dom\ t\ \subseteq\ L^*$.There are several requirements of $t$:
+\begin{description}
+		\item[Minimum Trie] The smallest Trie domain possible is the empty word $\epsilon$
+				\begin{itemize}
+						\item See section \ref{sec:init}
+				\end{itemize}
+		\item[Prefix Condition] If a word is in the domain of the Trie, all prefixs of the word are as well
+				\begin{itemize}
+						\item $w\ \in\ Dom\ t\ \Rightarrow \forall\ v\ \in\ L^*.(\exists v'.(vv'\ =\ w)\ \Rightarrow\ (v\ \in\ Dom\ t))$ 
+				\end{itemize}
+\end{description}
+
+We also define a relation $f$ between our abstract and concrete states. $f(t)\ =\ \{w\ |\ w\ \in\ Dom\ t.(t(w)\ =\ \textbf{TRUE})\}$.
+
+We define our refinement predicate $r$ to equal $(a\ =\ f(t))$
+
+\subsection{New Specifications}
+\subsubsection{Initialisation Predicate}
+								\label{sec:init}
+\hspace*{20mm}$\quad\textit{init\D}\ =\ (t\ =\ \{\epsilon\ \mapsto\ \textbf{FALSE}\})$
+\subsubsection{Add Word}
+\hspace*{10mm}\textbf{proc} \textit{addword\D} (\textbf{value} $x$: word) \\
+\hspace*{20mm}$\quad x,\ t:\ [\textbf{TRUE},\ x\ \in\ Dom\ t\ \land\ t(x)]$ 
+
+\subsubsection{Check Word}
+\hspace*{10mm}\textbf{func} \textit{checkword\D} (\textbf{value} $x$: word): bool \\
+\hspace*{20mm}$\quad \textbf{var}\ y\ \bullet\ x,\ y\ :\ [\textbf{TRUE},\ y\ =\ (x\ \in\ Dom\ t_0\ \land\ t_0(x))]; \textbf{return}\ y$
+
+\subsubsection{Delete Word}
+\hspace*{10mm}\textbf{proc} \textit{delword\D} (\textbf{value} $x$: word) \\
+\hspace*{20mm}$\quad x\ :\ [x\ \in\ Dom\ t\ \land\ t(x),\ \neg t(x)]$
+
+
+
+\subsection{Proof Burdens}
+\subsubsection{Initialisation}
+$$\textit{init}^{C}\ \Rightarrow\ \exists a.(\textit{init}^{A}\ \land\ r(a,\ c)$$
+\begin{align*}
+		&\quad \textit{init}^{C}\\
+		\Leftrightarrow&\quad \reason{definition of $\textit{init}^C$} \\
+		&\quad t\ =\ \{\epsilon\ \mapsto\ \textbf{FALSE}\} \\
+		\Rightarrow&\quad\reason{logic: create a set with existing information} \\
+		&\quad \langle\rangle\ =\ \{x\ |\ x\in\ Dom\ t.(t(x)\ =\ \textbf{TRUE}\} \\
+		\Rightarrow&\quad\reason{logic} \\
+		&\quad\exists W.(W\ =\ \langle\rangle\ \land\ W\ =\ \{x\ |\ x\in\ Dom\ t.(t(x)\ =\ \textbf{TRUE})\})\\
+		\Leftrightarrow&\quad \reason{definition of $\textit{init}^A$ and $r$} \\
+		&\quad\exists\ a.(\textit{init}^A\ \land\ r(a,\ c))
+\end{align*}
+
+\subsubsection{Add Word}
+$$\textit{pre}^A\ \land\ r(a,\ c)\ \Rightarrow\ \textit{pre}^{C}$$
+\begin{align*}
+		&\quad \reason{definition of $\textit{pre}^{A}$} \\
+		&\quad \textbf{TRUE}\ \land\ r\\
+		\Rightarrow&\quad \reason{definition of $\textit{pre}^{C}$} \\
+		&\quad \textbf{TRUE} 
+\end{align*}
+This is trivial for any value of r.
+
+$$\textit{pre}^A[\sfrac{a_0,\ x_0}{a,\ x}]\ \land r[\sfrac{a_0,\ x_0,\ c_0}{a,\ x,\ c}]\ \land \textit{post}^{C}\ \Rightarrow\ \exists a.\textit{post}^A\ \land\ r(a, c)$$
+\begin{align*}
+		&\quad \textit{pre}^A[\sfrac{a_0,\ x_0}{a,\ x}]\ \land r[\sfrac{a_0,\ x_0,\ c_0}{a,\ x,\ c}]\ \land \textit{post}^{C} \\
+		\Leftrightarrow&\quad \reason{Defintion of $\textit{pre}^A$ and $\textit{post}^C$} \\
+		&\quad \textbf{TRUE}[\sfrac{W_0}{W}]\ \land r(t,\ W)[\sfrac{t_0,\ W_0}{t,\ W}]\ \land\ \{x\ \in\ Dom\ t\ \land\ t(x)\}\\
+		\Leftrightarrow&\quad \reason{logic: drop true conjunct and definition of $r$} \\
+		&\quad \{W\ =\ \langle\ w\ |\ t(w)\rangle\}[\sfrac{W_0,\ t_0}{W,\ t}]\ \land\  x\ \in\ Dom\ t\ \land\ t(x) \\
+		\Leftrightarrow&\quad \reason{perform subsitutions} \\
+		&\quad W_0\ =\ \langle\ w\ |\ t_0(w)\rangle\ \land\ x\ \in\ Dom\ t\ \land\ t(x)\\
+		\Rightarrow&\quad\reason{logic: extend quatification with $t(x)\ =\ \textbf{TRUE}$} \\
+		&\quad W_0\ =\ \langle\ w\ |\ t_0(w)\rangle\ \land\ W\ =\ \langle W_0, x\rangle\ \land\ x\ \in\ Dom\ t\ \land\ t(x)\ \\
+		\Rightarrow&\quad \reason{logic: last two conjucts equivalent to last conjuct in new statement} \\
+		&\quad \exists a.(x\ \in\ a\ \land\ a\ =\ \langle\ w\ |\ t(w)\rangle) \\
+		\Rightarrow&\quad \reason{Definition of $r$ and $\textit{post}^A$} \\
+		&\quad \exists a.(\textit{post}^A\ \land\ r(a, c))
+\end{align*}
+
+\subsubsection{Check Word}
+$$\textit{pre}^A\ \land\ r(a,\ c)\ \Rightarrow\ \textit{pre}^C$$
+\begin{align*}
+		&\quad \reason{definition of $\textit{pre}^A$} \\
+		&\quad \textbf{TRUE}\ \land\ r\\
+		\Rightarrow&\quad\reason{definition of $\textit{pre}^C$} \\
+		&\quad \textbf{TRUE} 
+\end{align*}
+This is trivial for any value of r.
+
+$$\textit{pre}^A[\sfrac{a_0,\ x_0}{a,\ x}]\ \land r[\sfrac{a_0,\ x_0,\ c_0}{a,\ x,\ c}]\ \land \textit{post}^{C}\ \Rightarrow\ \exists a.(\textit{post}^A\ \land\ r(a,\ c))$$
+\begin{align*}
+		&\quad\textit{pre}^A[\sfrac{a_0,\ x_0}{a,\ x}]\ \land r[\sfrac{a_0,\ x_0,\ c_0}{a,\ x,\ c}]\ \land \textit{post}^{C} \\
+		\Leftrightarrow&\quad \reason{definition of $\textit{pre}^A$ and $\textit{post}^C$} \\
+		&\quad \textbf{TRUE}[\sfrac{W_0}{W}]\ \land\ r[\sfrac{W_0,\ t_0}{W,\ t}]\ \land\ \{y\ =\ (x\ \in\ Dom\ t_0\ \land\ t_0(x))\}\\
+		\Leftrightarrow&\quad\reason{logic: drop true conjunct and definition of $r$} \\ 
+		&\quad\{W\ =\ \langle\ x\ |\ t(x)\rangle\}[\sfrac{W_0,\ t_0}{W,\ t}]\ \land\ \{y\ =\ (x\ \in\ Dom\ t_0\ \land t_0(x))\} &&\\
+		\Leftrightarrow&\quad\reason{perform substitutions} \\
+		&\quad W_0\ =\ \langle\ x\ |\ t_0(x)\rangle\ \land\ y\ =\ (x\ \in\ Dom\ t_0\ \land t_0(x)) \\
+		\Rightarrow&\quad\reason{logic: extend quatification with $t(x)\ =\ \textbf{TRUE}$} \\
+		&\quad W_0\ =\ \langle\ w\ |\ t_0(w)\rangle\ \land\ W\ =\ \langle W_0, x\rangle\ \land\ y\ =\ (x\ \in\ Dom\ t_0\ \land\ t_0(x))\\
+		\Rightarrow&\quad\reason{logic} \\
+		&\quad\exists\ a.(y\ =\ (x\ \in\ a)\ \land\ a\ =\ \langle\ w\ |\ t(w)\rangle) \\
+		\Leftrightarrow&\quad\reason{definition of $r$ and $\textit{post}^A$}\\
+		&\quad\exists\ a.(\textit{post}^A \land\ r(a,\ c))
+\end{align*}
+
+\subsubsection{Delete Word}
+ $$\textit{pre}^A\ \land\ r(a,\ c)\ \Rightarrow\ \textit{pre}^C$$
+ \begin{align*}
+		 &\quad\textit{pre}^A\ \land\ r(a,\ c) \\
+		 \Leftrightarrow&\quad \reason{definition of $\textit{pre}^A$ and $r(a,\ c)$} \\
+		 &\quad x\ \in\ W\ \land\ W\ =\ \langle\ w\ |\ t(w)\ \rangle \\
+		 \Rightarrow&\quad\reason{logic} \\
+		 &\quad t(x)\ =\ \textbf{TRUE} \\
+		 \Rightarrow&\quad\reason{logic} \\
+		 &\quad x\ \in\ Dom\ t\ \land\ t(x) \\
+		 \Rightarrow&\quad\reason{definition of $\textit{pre}^C$} \\
+		 &\quad \textit{pre}^C
+ \end{align*}
+
+ $$ \textit{pre}^A[\sfrac{a_0,\ x_0, \ W_0}{a,\ x, W}]\ \land r[\sfrac{a_0,\ x_0, \ W_0}{a,\ x}]\ \land \textit{post}^{C}\ \Rightarrow\ \exists a.\textit{post}^A\ \land\ r$$
+
+\begin{align*}
+		&\quad\textit{pre}^A[\sfrac{a_0,\ x_0, \ W_0}{a,\ x, W}]\ \land r[\sfrac{a_0,\ x_0, \ W_0}{a,\ x}]\ \land \textit{post}^{C}\\
+		\Leftrightarrow&\quad\reason{definition of $\textit{pre}^A,\ r,$ and $\textit{post}^C$} \\
+		&\quad\{x\ \in\ W\}[\sfrac{W_0,\ x_0}{W,\ x}]\ \land\ r[\sfrac{t_0,\ W_0}{t,\ W}]\ \land\ \{\neg t(x)\}\\
+		\Leftrightarrow&\quad\reason{definition of r and perform substitutions} \\
+		&\quad x_0\ \in\ W_0\ \land\ W_0\ =\ \{w\ |\ t_0(w)\}\ \land\ \neg t(x) \\
+		\Rightarrow&\quad\reason{logic} \\
+		&\quad x_0\ \in \ w_0\ \land\ w_0\ =\ \{w\ |\ t_0(w)\}\ \land\ x\ \notin\ \{w\ |\ t(w)\} \\
+		\Rightarrow&\quad\reason{logic: for every concrete state there is an abstract state (see 2.2.5)} \\
+		&\quad x_0\ \in \ w_0\ \land\ w_0\ =\ \{w\ |\ t_0(w)\}\ \land\ \exists W.(x\ \notin\ W\ \land\ W = \{w\ |\ t(w)\}) \\
+		\Rightarrow&\quad\reason{logic :$(\phi\ \Rightarrow\ \psi)\ \Leftrightarrow (\phi\ \land\ \chi\ \Rightarrow\ \psi)$} \\
+		&\quad \exists W.(x\ \notin\ W\ \land\ W\ =\ \{w\ |\ t(w)\}) \\  
+		\Leftrightarrow&\quad\reason{definition of $\textit{post}^A$ and $r$}
+\end{align*}
+ 
+
+\subsubsection{Falsifiable Precondition}
+$$\forall\ c.(\exists a.\ r)$$
+\begin{align*}
+		&\quad\reason{definition of $c,\ a,\ \text{and},\ r$} \\
+		&\quad\forall\ t.(\exists\ W.\ W\ =\ \{w\ |\ t(w)\} \\ 
+\end{align*}
+
+This is trivial as the values in the domain of t that map to true is just some subset of $L*$, and we can pick any $W$ that is the same subset.
+
+
+\clearpage\section{Derivation to Toy Language}
+\subsection{New Dict}
+\textbf{proc} \textit{newdict} (\textbf{value} $t$)
+\begin{align*}
+		&\quad t:\ [\textbf{TRUE},\ t\ =\ \{\epsilon\ \mapsto\ \textbf{FALSE}\}]\quad\num{1} \\
+		\num{1}\sqsubseteq&\quad\reason{ass} \\
+		&\quad t\ :=\ \{\epsilon\ \mapsto\ \textbf{FALSE}\};
+\end{align*}
+
+\begin{align*}
+		&\textbf{proc}\ \textit{newdict}\ (\textbf{value}\ t) \\
+		&\qquad t\ :=\ \{\epsilon\ \mapsto\ \textbf{FALSE}\};
+\end{align*}
+
+
+
+\subsection{Add Word}
+\textbf{proc} \textit{addword} ($\textbf{value}\ x,\ \textbf{value}\ y,\ t$)
+
+This starts with the non-trivial precondition $x\ \in\ Dom\ t$, which could be false for all initial values of $x$ other than $\epsilon$, however, if we require that $x\ =\ \epsilon$ whenever the proc is called externally, then then precondition must always be true. Thus, as the operation is only called in the state space where $\epsilon\ \in\ Dom\ t$ and is only called with $y\ =\ \epsilon$, the precondition is non-falsifiable and equivalent to the true precondition given earlier. For the mathemematically rigourous conditions of the state space see the introduction to section 2.
+\begin{align*}
+		&\quad x,\ y,\ t:\ [x\ \in\ Dom\ t,\ x.y\ \in\ Dom\ t\ \land\ t(x.y)]\quad\num{1} \\
+		\num{1} \sqsubseteq&\quad\reason{if} \\
+		&\quad\textbf{if } y = \text{`\textbackslash0'} \textbf{ then} \\
+		&\qquad x,\ y,\ t:\ [x\ \in\ Dom\ t\,\ x.y\ \in\ Dom\ t\ \land\ t(x.y)]\quad\num{2} \\
+		&\quad\textbf{else} \\
+		&\qquad x,\ y,\ t:\ [x\ \in\ Dom\ t,\ x.y \ \in\ Dom\ t\ \land\ t(x.y)]\quad\num{3} \\ 
+		&\quad\textbf{fi;} \\
+		\num{2} \sqsubseteq&\quad\reason{func-ass} \\
+		&\quad t\ :=\ (t:\ x\ \mapsto\ \textbf{TRUE}); \\
+		\num{3}\sqsubseteq&\quad\reason{seq} \\
+		&\quad x,\ y,\ t:\ [x\ \in\ Dom\ t,\ x.y[0]\ \in\ Dom\ t]\quad\num{4} \\
+		&\quad x,\ y,\ t:\ [x.y[0]\ \in\ Dom\ t,\ x.y\ \in\ Dom\ t\ \land\ t(x.y)] \num {5} \\
+		\num{4}\sqsubseteq&\quad\reason{if} \\
+		&\quad\textbf{if } x.y[0]\ \notin\ Dom\ t\textbf{ then} \\
+		&\qquad x,\ y,\ t:\ [x.y[0]\ \notin\ Dom\ t, x.y[0]\ \in\ Dom\ t]\quad\num{6} \\
+		&\quad\textbf{else} \\
+		&\qquad x,\ y,\ t:\ [x.y[0]\ \in\ Dom\ t, x.y[0] \in Dom\ t]\quad\num{7} \\
+		&\quad\textbf{fi;} \\
+		\num{5} \sqsubseteq&\quad\reason{procedure call} \\
+		&\quad \textit{addword}(x.y[0], y[1..], t); \\
+		\num{6} \sqsubseteq&\quad\reason{ass} \\
+		&\quad Dom\ t\ := Dom\ t\ \cup\ \{x.y[0]\}; \\
+		\num{7} \sqsubseteq&\quad\reason{skip} \\
+		&\quad \textbf{skip};
+\end{align*}
+
+\begin{align*}
+		&\textbf{proc}\ \textit{addword}\ (\textbf{value}\ x,\ \textbf{value}\ y,\ t) \\
+		&\qquad \textbf{if } y\ =\ \text{`\textbackslash0'}\textbf{ then} \\
+		&\qquad\qquad t\ :=\ (t:\ x\ \mapsto\ \textbf{TRUE}); \\
+		&\qquad \textbf{else} \\
+		&\qquad\qquad\textbf{if } x.y[0]\ \notin\ Dom\ t\textbf{ then} \\
+		&\qquad\qquad\qquad Dom\ t\ :=\ Dom\ t\ \cup\ \{x.y[0]\}; \\
+		&\qquad\qquad\textbf{else} \\
+		&\qquad\qquad\qquad \textbf{skip};\\
+		&\qquad\qquad\textbf{fi;} \\
+		&\qquad\qquad\textit{addword}(x.y[0],\ y[1...],\ t); \\
+		&\qquad \textbf{fi;}
+\end{align*}
+
+
+
+\subsection{Check Word}
+\textbf{func} \textit{checkword} ($\textbf{value}\ \textit{prefix},\ \textbf{value}\ x,\ t,\ \textbf{return}\ y$)
+\begin{align*}
+		&\quad \textbf{var}\ y\ \bullet\ \textit{prefix},\ x,\ y,\ t\ :\ [\textbf{TRUE},\ y\ =\ (x\ \in\ Dom\ t\ \land\ t(x))]; \textbf{return}\ y\quad\num{1} \\
+		\num{1}\sqsubseteq&\quad\reason{if} \\
+		&\quad \textbf{if }x\ =\ \text{`\textbackslash0'}\textbf{ then} \\
+		&\qquad \textit{prefix},\ x,\ y,\ t\ :\ [\textit{prefix}.x\ \in\ Dom\ t,\ y\ =\ (\textit{prefix}.x\ \in\ Dom\ t\ \land\ t(\textit{prefix}.x))]\quad\num{2}\\
+		&\quad\textbf{else} \\
+		&\qquad \textit{prefix},\ x,\ y,\ t\ :\ [\textit{prefix}\ \in Dom\ t,\ y\ =\ (\textit{prefix}.x\ \in\ Dom\ t\ \land\ t(x))] \quad\num{3} \\
+		&\quad\textbf{fi;} \\
+		\num{2}\sqsubseteq&\quad\reason{logic and ass} \\
+		&\quad y\ :=\ t(x); \\
+		\num{3}\sqsubseteq&\quad\reason{if} \\
+		&\quad\textbf{if} \textit{prefix}.x[0]\ \in\ Dom\ t\textbf{ then} \\
+		&\qquad \textit{prefix},\ x,\ y,\ t\ :\ [\textit{prefix}.x[0]\ \in\ Dom\ t,\ y\ =\ (\textit{prefix}.x\ \in\ Dom\ t\ \land\ t(\textit{prefix}.x))]\quad\num{4} \\
+		&\quad\textbf{else} \\
+		&\qquad \textit{prefix},\ x,\ y,\ t\ :\ [\textit{prefix}.x[0]\ \notin\ Dom\ t,\ y\ =\ (\textit{prefix}.x\ \in\ Dom\ t\ \land\ t(\textit{prefix}.x))]\quad\num{5} \\
+		&\quad\textbf{fi;} \\
+		\num{4}\sqsubseteq&\quad\reason{function call} \\
+		&\quad y\ :=\ \textit{checkword}\ (\textit{prefix}.x[0],\ x[1..],\ t,\ y) \\
+		\num{5}\sqsubseteq&\quad\reason{logic (\textbf{prefix condition})} \\
+		&\quad y\ :=\ \textbf{FALSE}
+\end{align*}
+
+\begin{align*}
+		&\textbf{func}\ \textit{checkword}(\textbf{value}\ \textit{prefix},\ \textbf{value}\ x,\ t,\ \textbf{return}\ y) \\ 
+		&\qquad\textbf{if } y[0]\ =\ \text{`\textbackslash0'}\textbf{ then} \\
+		&\qquad\qquad b\ :=\ t(x); \\
+		&\qquad\textbf{else} \\
+		&\qquad\qquad\textbf{if } x.y[0]\ \in\ Dom\ t\textbf{then} \\
+		&\qquad\qquad\qquad b\ :=\ \textit{checkword}(x.y[0],\ w[1..],\ t);\\
+		&\qquad\qquad\textbf{else} \\
+		&\qquad\qquad\qquad b\ :=\ \textbf{FALSE};\\
+		&\qquad\qquad\textbf{fi;}\\
+		&\qquad\textbf{fi;}\\
+		&\qquad \textit{return}\ b;
+\end{align*}
+
+\subsection{Delete Word}
+\textbf{proc} \textit{delword} ($\textbf{value}\ x,\ \textbf{value}\ y,\ t$)
+\begin{align*}
+		&\quad x,\ y,\ t:\ [xy\ \in\ Dom\ t\ \land\ t(x),\ \neg t(x)]\quad\num{1} \\
+		\num{1}\sqsubseteq&\quad\reason{if} \\
+		&\quad \textbf{if } y\ =\ \text{`\textbackslash0'} \textbf{ then} \\
+		&\qquad x,\ y,\ t:\ [xy\ \in\ Dom\ t\ \land\ t(xy),\ \neg t(x)];\quad\num{2} \\
+		&\quad \textbf{else} \\
+		&\qquad x,\ y,\ t:\ [x\ \in\ Dom\ t\ \land\ t(xy),\ \neg t(x)]; \quad\num{3} \\
+		&\quad \textbf{fi;} \\
+		\num{2}\sqsubseteq&\quad\reason{ass} \\
+		&\quad t\ :=\ (t:\ x\mapsto\ \textbf{FALSE}) \\
+		\num{3}\sqsubseteq&\quad\reason{procedure call} \\
+		&\quad \textit{delword}(x.y[0],\ y[1..],\ t);
+\end{align*}
+
+\begin{align*}
+		&\textbf{proc}\ \textit{delword}\ (\textbf{value}\ x,\ \textbf{value}\ y,\ t) \\
+		&\qquad\textbf{if } y\ =\ \text{`\textbackslash0'} \textbf{ then} \\
+		&\qquad\qquad t\ :=\ (t:\ x\ \mapsto\ \textbf{FALSE}); \\
+		&\qquad\textbf{else} \\
+		&\qquad\qquad \textit{delword}(x.y[0],\ y[1..],\ t); \\
+		&\qquad\textbf{fi;}
+\end{align*}
+
+
+\clearpage\section{Translation to C}
+\subsection{Code}
+\begin{lstlisting}[style=customc]
+void newdict (Dict *dp)
+{
+    (*dp) = malloc(sizeof(Dict));
+    (*dp)->eow = FALSE;
+    int i;
+    for (i = 0; i < VECSIZE; i++)
+	{
+        (*dp)->cvec[i] = calloc(0, sizeof(Dict));
+		(*dp)->cvec[i] = NULL;
+    }
+}
+
+
+void addword (const Dict r, const word w)
+{
+    if (w[0] == 0)
+        r->eow = TRUE;
+    else
+    {
+        if (r->cvec[w[0] - 'a'] == NULL)
+            newdict(&(r->cvec[w[0] - 'a']);
+		else
+		    \\ SKIP
+        addword(r->cvec[w[0] - 'a'], w + sizeof(char));
+    }
+}
+
+
+void checkword (const Dict r, const word w)
+{
+    bool b;
+    if (w[0] == 0)
+        b = r->eow;
+    else
+	{
+        if (r->cvec[w[0] - 'a'] == NULL)
+            b = FALSE;
+		else
+            b = checkword(r->cvec[w[0] - 'a'], w + sizeof(char));
+    }
+    return b;
+}
+
+
+void delword (const Dict r, const word w)
+{
+    if (w[0] == 0)
+        r->eow = FALSE;
+    else
+        delword(r[w[0] - 'a'], w + sizeof(char));
+}
+\end{lstlisting}
+
+\subsection{Changes}
+\begin{itemize}
+		\item In the toy language we could access $t(w)$ for any $w$ at any point, however in C we can only check one letter at a time, and the rest of the word is made up of context (nodes already traversed)
+		\item In the toy language we simply pass $t$ to the recursive function, whereas in C we must pass the appropriate trie node
+		\item In the toy language it is enough to set $t\ :=\ (\epsilon\ \mapsto\ \textbf{FALSE})$ however in C we need to allocate memory and set the values of all the sub-nodes to NULL
+		\item When we add a word or prefix to $Dom\ t$ in the toy language we just take the union of $t$ with the mapping, however in c we must add a new node to the Trie and treat it like a fresh Trie. 
+\end{itemize}
+
+
+
+
+\end{document}

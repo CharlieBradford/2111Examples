@@ -1,0 +1,292 @@
+\documentclass[a4paper]{article}
+\usepackage[margin = 1.5cm]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{enumitem}
+\usepackage{stmaryrd}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{csquotes}
+\usepackage{blindtext}
+\usepackage{xfrac}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[latin1]{inputenc}
+
+
+
+\definecolor{mGreen}{rgb}{0,0.6,0}
+\definecolor{mGray}{rgb}{0.5,0.5,0.5}
+\definecolor{mPurple}{rgb}{0.58,0,0.82}
+\definecolor{backgroundColour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{CStyle}{
+    backgroundcolor=\color{backgroundColour},   
+    commentstyle=\color{mGreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{mGray},
+    stringstyle=\color{mPurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    language=C
+}
+\setlist[description]{leftmargin=\parindent,labelindent=\parindent}
+
+\title{% 
+		COMP3821 \\
+\large Extension Algorithms and Programming Techniques}
+\author{Charlie Bradford}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+\section{Algorithm Analysis}
+
+\subsection{Asymptotic Behaviour}
+\begin{description}
+		\item[$f(n) = O(g(n))$] $\exists n_0, c \in \mathbb{R}(\forall n > n_0(0 \leq f(n) \leq cg(n)))$ i.e. g(n) is the worst case.
+		\item[$f(n) = \Omega(g(n))$] $\exists n_0, c \in \mathbb{R}(\forall n > n_0(0 \leq cg(n) \leq f(n)))$ i.e. g(n) is the best case.
+		\item[$f(n) = \Theta(g(n))$] $ f(n) = O(g(n)) \land f(n) = \Omega(g(n)) $ i.e. f(n) has the same best and worst case growth. 
+\end{description}
+We also have the notation $f(n) = o(g(n))$. This is used when $g(n)$ is not asymptotically tight. For example $n \neq O(n^2)$ but $n = o(n^2)$. $f(n) = \omega(g(n))$ is used similarly.
+
+\subsection{The Master Theorem}
+\begin{align*}
+		& \text{Let:} \\
+		& a, b \in \mathbb{Z}, a \geq 1 \land b > 1 \\
+		& f(n) \ge 0 \land f'(n) \geq 0 \\
+		& T(n) = aT(\frac{n}{b}) + f(n) \\
+		& \text{Then:} \\
+		& \exists \epsilon \ge 0 (f(n) = O(n^{log_{b}a - \epsilon})) \Rightarrow T(n) = \Theta(n^{log_{b}a}) \\
+		& \exists \epsilon \ge 0 (f(n) = \Theta(n^{log_{b}a})) \Rightarrow T(n) = \Theta(n^{log_{b}a}log_{2}n) \\
+		& \exists \epsilon \ge 0 (f(n) = \Omega(n^{log_{b}a + \epsilon}))\land \exists c < 1(af(\frac{n}{b}) \leq cf(n)) \Rightarrow T(n) = \Theta(f(n))
+\end{align*}
+
+\subsection{Fast Integer Multiplication}
+If we are multiplying two n-digit numbers, $A$ and $B$, we first split them into halves $$A = A_1 10^\frac{n}{2} + A_0$$ $$B = B_1 10^\frac{n}{2} + B_0$$
+Then we can calculate AB:
+\begin{align*}
+		AB &= A_1 B_1 10^n + (A_0 B_1 + A_1 B_0) 10^\frac{n}{2} + A_0 B_0 \\
+		& \text{Here we have halved the size of each multiplication (reducing complexity by fourfold)} \\
+		& \text{but quadrupling the number of multiplications} \\
+		&= A_1 B_1 10^n + ((A_1 + A_0)(B_1 + B_0) - A_1 B_1 - A_0 B_0) 10^\frac{n}{2} + A_0 B_0 \\
+		& \text{Now we have reduced the number of multiplications, leading to a lower complexity than $O(n^2)$}
+\end{align*}
+
+Now we have $T(n) = 3T(\frac{n}{2}) + cn$. $f(n) = cn$ as addition is linear. $log_2 3 \sim 1.6$ so $ cn = O(n^{log_{2} 3})$. Therefore the first case of the master theorem applies and $T(n) = \Theta(n^{log_{2} 3})$.
+
+Theoretically we could keep making the algorithm faster by splitting the number into more bits, but the constant factors start to get so large that the performance is to slow with reasonable $n$.
+
+\subsection{Problems}
+Put examples.
+
+\section{Divide-And-Conquer Method}
+
+\subsection{Weighing Coins}
+Problem: we have nine coins and one is lighter than the others. How do we find the lighter by using a scale only twice times.
+Solution: Weigh three of the coins against three more. Select the lighter three, if they are the same then take the coins that were not eighed. Weigh one coin agaist the other, now you have the lighter coin.
+
+\subsection{Multiplying Polynomials}
+A polynomial of degree $n$ is uniquely determined by the coefficients $A_i$. As in $ A_0 + A_1 x + A_2 x^2 + ... + A_n x^n$. Thus we can determine the values of the coefficents using only n+1 different valuex of $x$.
+$$P_A (x) \leftrightarrow \{(x_0, P_A (x_0)), (x_1, P_A (x_1), ..., (x_n, P_A (x_n))\}$$
+
+ \begin{align*}
+		 \left[ \begin{array}{c} A_0 \\ A_1 \\ A_2 \\ \vdots \\ A_{2n} \end{array} \right]
+		\left[ \begin{array}{ccccc} 1 & 1 & 1 & \dots & 1 \\ 1 & x_{2n+1} & x_{2n+1}^2 & \dots & x_{2n+1}^{2n} 	\\ 1 & x_{2n+1}^2 & x_{2n+1}^{2*2} & \dots & x_{2n+1}^{2*2n} 
+            \\ \vdots & \vdots & \vdots & \ddots & \vdots \\
+            1 & x_{2n+1}^{2n} & x_{2n+1}^{2n * 2} & \dots & x_{2n+1}^{2n * 2n} \\
+                \end{array}\right]
+				&=  \left[ \begin{array}{c} P_a (1) \\ P_a (x_{2n}) \\ P_a (x_{2n}^{2})\\ \vdots \\ P_a (x_{2n}^{2n-1}) \end{array} \right] \\
+            \left[ \begin{array}{c} A_0 \\ A_1 \\ A_2 \\ \vdots \\ A_{2n} \end{array} \right] &=
+            \left[ \begin{array}{ccccc} 1 & 1 & 1 & \dots & 1 \\ 1 & x_{2n+1} & x_{2n+1}^2 & \dots & x_{2n+1}^{2n} 
+            \\ 1 & x_{2n+1}^2 & x_{2n+1}^{2*2} & \dots & x_{2n+1}^{2*2n} 
+            \\ \vdots & \vdots & \vdots & \ddots & \vdots \\
+            1 & x_{2n+1}^{2n} & x_{2n+1}^{2n * 2} & \dots & x_{2n+1}^{2n * 2n} \\
+                \end{array}\right]^{-1} \left[ \begin{array}{c} P_a (1) \\ P_a (x_{2n}) \\ P_a (x_{2n}^{2})\\ \vdots \\ P_a (x_{2n}^{2n-1}) \end{array} \right] \\
+\end{align*}
+
+		 But with polynomials that have degree in the thousands, or even millions, this breaks down as not all $x_i$ can be 1. Except it can. See below.
+		
+
+\subsection{Fast Fourier Transform}
+\subsection{Discrete Fourier Transform}
+
+\section{The Greedy Method}
+A greedy algorithm creates a solution through a series of steps, choosing each movement at each step without considering the whole problem.
+
+\subsection{Activity Selection}
+\subsection{Djikstra's Algorithm}
+Djikstra's algorithm finds the shortest distance between two nodes in a graph. Starting from the origin node $s$ in a graph $G(V, E)$, algorithm maintains a set $S$ of vertices $u$ such that the minimum distance between $s$ and $u$, $d(u)$, is known. Then for each node $v \in V - S$, we find the shortest path through $S$ to $u$, where there is a single edge connecting $v$ and $u$. Then, for all such nodes, we consider $d'(v) = \forall u \in S.e = (u, v),min(d(u) + l_e)$. Then once we have the pair $(u,v)$ for which $d'(v)$ is minimal, we add $v$ to $S$. 
+
+\subsection{Machining Problem}
+Items have to be machined and then polished. One machine does the machining, and a second does the polishing. N items $I$, for each item $I_k$ you know the machining time $M_k$ and the polishing time $P_k$. How do you schedule the machining and polishing so that so that the entire process takes as little time as possible?
+
+Answer: In increasing order of $P_k$.
+
+Explanation: The machining machine can be run constantly so $\sum\limits_{k=1}^{n} M_k$ is constant. So by scheduling items with the lowest $P_k$ first we get the over as quickly as possible to free time for later items.
+\subsection{Discrete Knapsack Problem}
+\subsection{Huffman Codes}
+\subsection{Set Cover Approximation}
+
+\section{Dynamic Programming}
+
+\section{Network Flow Algorithms}
+		 A flow network is a directed graph, with a 'source' and a 'sink.' Network flow graphs are weighted, with each edge having a maximum capacity. A flow is a real non-negative function that maps each edge to a value $f\ :\ E\ \Rightarrow\ \mathbb{R}$. Each flow must satisfy
+		 \begin{description}
+				 \item[Capacity Constraint] $\forall e(u,\ v)\ \in\ E.\ f(u,\ v)\ \leq\ e(u,\ v)$
+				 \item[Flow Conservation] $\forall v\ \in\ V\ -\ \{s,\ t\}.\ $$$\sum_{(u, v) \in E} f(u,\ v)\ =\ \sum_{(v,w)\in E} f(v, w)$$
+		 \end{description}
+
+		 When we create a flow in a graph we must reduce the capacity in the direction of the flow and create a virtual flow in the opposite direction. This represents the potential to reduce flow through the original edge. 
+
+\subsection{Ford-Fulkerson Algorithm}
+		 \begin{itemize}
+				 \item Keep adding flows until there is no residual flow
+				 \item Flows that can be added are called augmenting flows
+				 \item When there is now residual flows, you have achieved maximal flow
+				 \item We know that this is a valid tactict because of the notion of a minimal cut
+				 \item Slow - Exponential
+		 \end{itemize}
+\subsection{Minimal Cut}
+		 \begin{itemize}
+				 \item A cut is a partitioning of the flow graph with the source on one side and the sink on the other
+				 \item The maximum flow across a cut is the sum of all flows towards the sink less the sum of all flows towards the source
+				 \item The cut with the lowest maximum flow is the bottleneck of the flow graph
+				 \item The maximal flow of the graph is equal to the flow across this bottleneck
+				 \item When there is no residual flow across the graph then the bottleneck has been completely filled and we have found the max flow
+		 \end{itemize}
+\subsection{Edmonds-Karp Algorithm}
+		 \begin{itemize}
+				 \item Same as Ford-Fulkerson but the flow that uses the minimum number of edges is selected first
+				 \item Still pretty slow - $O(|V||E|^2)$
+		 \end{itemize}
+
+\subsection{Multiple Sources \& Sinks}
+		 \begin{itemize}
+				 \item Add super sources and sinks
+				 \item These connect to all sources and sinks and edges can ahve infinite capacity
+				 \item Some edges can have secondary weights such as cost of transport
+				 \item There are algorithms to find the cheapest of all max flows.
+		 \end{itemize}
+\subsection{Other problems}
+\subsubsection{Maximal Matching of Bipartite Graphs}
+\begin{itemize}
+		\item Add super source connecting to one side
+		\item Add super sink connecting to the other
+		\item Set all edge capacitites to one
+		\item Find maximal flow
+		\item The maximal matching graph is the subgraph of all edges with flow
+\end{itemize}
+\subsubsection{Movie Rental}
+Assume you have a movie rental agency. At the moment you have $k$
+movies in stock, with $m_i$ copies of movie $i$. Each of $n$ customers can rent
+out at most 5 movies at a time. The customers fave sent you their
+preferences which a list of movies they would like to see. Your goal is to
+dispatch the largest possible number of movies.
+\begin{itemize}
+		\item Form a bipartite graph with customers on source side and movies on sink side
+		\item Super source with capacity 5 for each customer
+		\item Each customer linked to preferred movies with linked one (can be secondarily weighted)
+		\item Find maximal flow, graph shows who gets what
+\end{itemize}
+
+\subsubsection{Computer Network}
+On one side of a graph you have several servers and on the other you have end users, there are also many router nodes in between. You need to shut down flow from servers to hosts, which links need to be shut down. Shutting down a link incurs a cost so you need to shutdown the fewest possible.
+\begin{itemize}
+		\item Create super source connecting to all the servers and a super sink connecting to all the end users
+		\item Give all link a weight of one
+		\item Find the max flow graph
+		\item The verticies accessible from the sink via augmenting paths are one side of the partition, non-accessible verticies are the other side of the partition.
+\end{itemize}
+
+\section{String Matching}
+If there is a need to find a contiguous substring in a much longer string, character comparison algorithms get very complicated if the either string cannot fit in a register. There are several was to resolve this.
+
+\subsection{Rabin-Karb}
+To find the string $B$ in the much long string $A$ we would first map each letter in their alphabet $\mathbb{A}$ to an integer. We now define the primary hashing function $h(x)$ to be 
+\begin{align}
+		h(B)\quad&=\quad h(b_1b_2b_3...b_m)\\
+		&=\quad d^{m-1}b_1 + d^{m-2}b_2 + ... + d^1b_{m-1} + b_m\\
+		&=\quad b_m + d(b_{m-1} + d(b_{m-2} + ... + d(b_2 + db_1)...))
+\end{align}
+Now we pick some large prime number $p$ such that $(d-1)p$ fits in a single register. Then we define the final hashing function to be $H(x)\ =\ h(x)\ \textbf{mod}\ p$.
+
+Now, taking $A_s$ to be the substring of $A$ starting as character $s$ and of the same length as $B$, we compute $H(A_s)$. In order to save time and complexity we need only computer $H(A_1)$ then we can iterate through the relation $H(A_{s+1})\ =\ (d * H(A_s) - (d^m 
+\textbf{ mod}p)a_s + a_{s+m})\textbf{ mod }p$. Now we need only do a character by character matching if $H(A_s)\ =\ H(B)$.  
+
+\subsection{Knuth-Morris-Pratt}
+The KMP Compute-Prefix algorithm takes in some long string and outputs an array $\pi$. $\pi$ maps the index $i$ of each letter to some index $j$, where the entirety of the string up to $j$ is a suffix of the string up to $i$. If a new character is introduced, then the index of that character will be mapped to 0, if a substring is repeated later on, then the mapping of the repetition will be sequetial.  
+
+Once we have $\pi$ for our shorter string $P$ then we iterate through our longer string, resetting to the last value we have a match for every time that we receive an incorrect comparison. 
+
+\section{Linear Programming}
+
+\section{Intractable Problems and Approximation Algorithms}
+
+\section{Randomisation}
+\subsection{Random Select}
+\subsection{Linear Time for Order}
+\subsection{Hash Functions}
+\subsection{Skip Lists}
+\begin{itemize}
+		\item Like a doubly linked list but certain nodes have different heights (up to max $log_2 n$ for $n$-element list)
+		\item Searching for $k$:
+				\begin{enumerate}
+						\item Start at head
+						\item Move to the node pointed to at the highest level
+						\item If the value is smaller than $k$ go to 2.
+						\item If the value is equal to $k$ return
+						\item Move the the node pointed to at the next highest level, go to 3.
+						\item Expected time $O(log_2 n)$
+				\end{enumerate}
+		\item Insertion node with value $k$:
+				\begin{itemize}
+						\item Find the correct location for $k$
+						\item The height, $i$, for $k$'s node is $\frac{1}{2^i}$
+						\item The node is linked from the bottom up
+						\item Expected time if $O(log_2 n)$ for searching and $O(1)$ for inserting
+				\end{itemize}
+		\item Deletion:
+				\begin{itemize}
+						\item As in a doubly linked list
+						\item Sort out all pointers from the bottom up
+				\end{itemize}
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
